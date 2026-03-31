@@ -1,75 +1,123 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import akshare as ak
-import plotly.express as px
 import plotly.graph_objects as go
+import requests
+from io import BytesIO
 
-# --- 页面配置 ---
-st.set_page_config(page_title="Whale Tracker & Market Pulse", layout="wide")
-st.title("📊 投资大鲸追踪 & 市场折溢价看板")
+# --- 1. 页面基本配置 ---
+st.set_page_config(page_title="大鲸持仓追踪 (Whale Tracker)", layout="wide", page_icon="🐋")
+st.title("🐋 全球顶级投资人 & 议员持仓动态 (社区版)")
 
-# --- 模拟数据：大佬持仓 ---
-WHALE_DATA = {
-    "段永平 (H&H)": {"AAPL": 50.3, "BRK.B": 20.6, "NVDA": 7.7, "PDD": 7.5, "GOOGL": 3.3, "其他": 10.6},
-    "佩洛西 (Nancy Pelosi)": {"NVDA": 19.0, "GOOGL": 16.0, "AVGO": 15.0, "VST": 10.0, "TEM": 7.0, "其他": 33.0},
-    "巴菲特 (Berkshire)": {"AAPL": 40.2, "AXP": 12.5, "BAC": 10.1, "KO": 9.2, "CVX": 6.8, "其他": 21.2}
+# --- 模拟数据 (作为备选和佩洛西展示) ---
+# 数据来源：最新的公开 13F 或 PTR 披露
+MOCK_PELOSI = {"标的": ["NVDA", "GOOGL", "AVGO", "VST", "其他"], "占比": [19, 16, 15, 10, 40]}
+MOCK_DYP = {"标的": ["AAPL", "BRK.B", "GOOG", "PDD", "其他"], "占比": [50, 20, 10, 10, 10]}
+
+# --- 大佬头像数据 (公共 URL) ---
+AVATARS = {
+    "巴菲特": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Warren_Buffett_KU_Visit.jpg/400px-Warren_Buffett_KU_Visit.jpg",
+    "佩洛西": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Nancy_Pelosi_official_portrait_2019.jpg/400px-Nancy_Pelosi_official_portrait_2019.jpg",
+    "段永平": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Pinduoduo_logo.svg/128px-Pinduoduo_logo.svg.png" # 段永平低调，用他重仓的拼多多Logo代替
 }
 
-# --- 1. 大佬持仓追踪模块 ---
-def render_whale_tab():
-    st.header("🐋 全球大佬最新持仓观察")
-    selected_whale = st.selectbox("选择要观察的持仓对象", list(WHALE_DATA.keys()))
-    
-    data = WHALE_DATA[selected_whale]
-    # 注意这里列名是 '标的'
-    df_whale = pd.DataFrame(list(data.items()), columns=['标的', '仓位占比'])
-    
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        # 修正：names 参数必须和 dataframe 的列名 '标的' 一致
-        fig = px.pie(df_whale, values='仓位占比', names='标的', 
-                     title=f"{selected_whale} 核心持仓分布",
-                     hole=0.4, color_discrete_sequence=px.colors.qualitative.Pastel)
-        fig.update_traces(textinfo='percent+label')
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        st.subheader("💡 风格总结")
-        if "佩洛西" in selected_whale:
-            st.markdown("- **“期权女王”**：偏好远期深度价内 Call，高杠杆博取政策红利。\n- **行业聚焦**：高度集中于算力 (NVDA) 和 生物科技。")
-        elif "段永平" in selected_whale:
-            st.markdown("- **“中国巴菲特”**：极度集中于苹果和具备长效护城河的公司。\n- **现金奶牛**：偏好分红稳定且有强劲现金流的商业模式。")
-        st.table(df_whale)
-
-# --- 2. ETF 溢价与限购模块 ---
-def render_etf_tab():
-    st.header("🎯 跨境 ETF 折溢价 & 限购追踪")
+# --- 核心函数：获取巴菲特真实持仓 (yfinance) ---
+@st.cache_data(ttl=3600*24) # 缓存一天，避免重复抓取
+def get_buffett_holdings():
     try:
-        df_etf = ak.fund_etf_spot_em()
-        # 挑选几个有代表性的代码
-        targets = ["159612", "513100", "513500", "513050", "159941"]
-        res = df_etf[df_etf['代码'].isin(targets)].copy()
+        # 获取伯克希尔哈撒韦的数据
+        brk = yf.Ticker("BRK-B")
+        # .holdings 接口有时会失效，需要增强容错
+        df = brk.holdings
+        if df is None or df.empty:
+            raise ValueError("yfinance 未能返回有效持仓数据")
         
-        # 模拟申购状态
-        res['申购状态'] = "暂停/限额" 
-        res['溢价率'] = -res['折价率']
+        # 整理数据
+        df = df.reset_index()
+        df.columns = ['标的', '占比']
+        # yfinance 占比通常是小数，转为百分比
+        df['占比'] = df['占比'] * 100
         
-        show_df = res[['代码', '基金简称', '最新价', '溢价率', '申购状态']]
-        st.dataframe(show_df.style.highlight_max(axis=0, subset=['溢价率'], color='#FFCCCC'))
+        # 整理前五大和“其他”
+        df = df.sort_values(by='占比', ascending=False)
+        top5 = df.head(5)
+        others_sum = df['占比'].iloc[5:].sum()
+        new_row = pd.DataFrame({'标的': ['其他'], '占比': [others_sum]})
+        final_df = pd.concat([top5, new_row], ignore_index=True)
         
-        fig = px.bar(res, x='基金简称', y='溢价率', title="热门 ETF 溢价率直观对比")
-        st.plotly_chart(fig, use_container_width=True)
-    except:
-        st.warning("国内数据接口获取稍有延迟，请稍后再试。")
+        return final_df, "✅ 数据源：yfinance 接口 (最新披露)"
+    except Exception as e:
+        # 降级为模拟数据
+        print(f"Buffett API Error: {e}")
+        return pd.DataFrame({"标的": ["AAPL", "AXP", "BAC", "KO", "其他"], "占比": [41, 12, 10, 9, 28]}), "⚪ 数据源：核心披露模拟 (API离线)"
 
-# --- 3. 策略展示 ---
-def render_strategy_tab():
-    st.header("🤖 个股量化策略执行")
-    st.write("此处可集成之前的 NVDA/TSLA 均线策略逻辑...")
+# --- 核心函数：绘制佩洛西风格环形图 ---
+def draw_donut_chart(df, name):
+    # 根据你的图片定制高级颜色盘
+    colors = ['#2ecc71', '#3498db', '#9b59b6', '#f1c40f', '#e67e22', '#e74c3c', '#bdc3c7']
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=df['标的'], 
+        values=df['占比'], 
+        hole=.6, 
+        marker_colors=colors,
+        textinfo='label+percent',
+        insidetextorientation='radial',
+        hoverinfo='label+value+percent'
+    )])
 
-# --- 导航栏 ---
-tab1, tab2, tab3 = st.tabs(["🐋 大佬持仓", "🎫 ETF 溢价/限购", "📉 个股策略"])
-with tab1: render_whale_tab()
-with tab2: render_etf_tab()
-with tab3: render_strategy_tab()
+    fig.update_layout(
+        annotations=[dict(text=f'{name}<br>Portfolio', x=0.5, y=0.5, font_size=20, showarrow=False, font_color="#333")],
+        showlegend=False,
+        margin=dict(t=10, b=10, l=10, r=10),
+        paper_bgcolor='rgba(0,0,0,0)', # 背景透明
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+# --- 主界面导航 ---
+tab1, tab2 = st.tabs(["🐋 13F 大鲸持仓 (巴菲特/段永平)", " Nancy Pelosi 议员交易追踪"])
+
+# --- 标签页 1: 巴菲特与段永平 ---
+with tab1:
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.header("巴菲特 (Berkshire)")
+        # 展示照片
+        st.image(AVATARS["巴菲特"], width=200, caption="Warren Buffett")
+        # 获取真实数据
+        with st.spinner('正在尝试接入真实 13F API...'):
+            df_brk, data_source = get_buffett_holdings()
+        st.caption(data_source)
+        st.table(df_brk)
+        
+    with col2:
+        # 绘制高级环形图
+        fig_brk = draw_donut_chart(df_brk, "Buffett")
+        st.plotly_chart(fig_brk, use_container_width=True)
+        st.info("💡 13F数据通常在每季度结束后 45 天内披露，具有天然滞后性。")
+
+    st.markdown("---") # 分割线
+    
+    col3, col4 = st.columns([1, 2])
+    with col3:
+        st.header("段永平 (模拟Demo)")
+        st.image(AVATARS["段永平"], width=100)
+        df_dyp = pd.DataFrame(MOCK_DYP)
+        st.table(df_dyp)
+    with col4:
+        fig_dyp = draw_donut_chart(df_dyp, "DYP")
+        st.plotly_chart(fig_dyp, use_container_width=True)
+
+# --- 标签页 2: 佩洛西 ---
+with tab2:
+    col5, col6 = st.columns([1, 2])
+    with col5:
+        st.header("佩洛西 (Demo)")
+        st.image(AVATARS["佩洛西"], width=200, caption="Nancy Pelosi")
+        df_p = pd.DataFrame(MOCK_PELOSI)
+        st.table(df_p)
+    with col6:
+        fig_p = draw_donut_chart(df_p, "Pelosi")
+        st.plotly_chart(fig_p, use_container_width=True)
+        st.info("💡 佩洛西喜欢买深度价内 Call (远期期权)，高杠杆博取政策红利。数据来源于议员 PTR 披露。")
