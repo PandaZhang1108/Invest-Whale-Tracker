@@ -3,117 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whale Portfolio Tracker</title>
+    <title>Alpha Whale Portfolio Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .tab-active { border-bottom: 2px solid #000; color: #000; font-weight: 600; }
-        .tab-inactive { color: #6b7280; font-weight: 400; }
-        .tab-inactive:hover { color: #374151; }
+        .tab-active { border-bottom: 2px solid #111827; color: #111827; font-weight: 600; }
+        .tab-inactive { color: #6b7280; font-weight: 400; border-bottom: 2px solid transparent; }
+        .tab-inactive:hover { color: #374151; border-color: #d1d5db; }
+        
+        .sub-tab-active { background-color: #e5e7eb; color: #111827; font-weight: 600; }
+        .sub-tab-inactive { background-color: transparent; color: #6b7280; font-weight: 500; }
+        .sub-tab-inactive:hover { background-color: #f3f4f6; color: #374151; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased">
 
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <header class="mb-8">
-        <h1 class="text-3xl font-bold tracking-tight">Alpha Whale Portfolio</h1>
-        <p id="update-date" class="text-sm text-gray-500 mt-2">数据加载中...</p>
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Alpha Whale Tracker</h1>
+        <p id="update-date" class="text-sm text-gray-500 mt-2 flex items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            Loading SEC 13F Data...
+        </p>
     </header>
 
     <div class="border-b border-gray-200 mb-6">
-        <nav id="tabs-nav" class="-mb-px flex space-x-8" aria-label="Tabs"></nav>
+        <nav id="holder-tabs" class="-mb-px flex space-x-8" aria-label="Tabs"></nav>
     </div>
 
-    <div class="flex space-x-4 mb-4 text-sm">
-        <button class="bg-gray-200 px-3 py-1 rounded font-medium">Portfolio (当前持仓)</button>
-        <button class="text-gray-500 px-3 py-1 hover:bg-gray-100 rounded cursor-not-allowed" title="需重构爬虫数据支持">Activity (历史操作 🔒)</button>
+    <div class="flex space-x-2 mb-6">
+        <button id="btn-portfolio" class="px-4 py-2 text-sm rounded-md transition-colors duration-150 sub-tab-active" onclick="switchMode('portfolio')">
+            💼 Portfolio (当前持仓)
+        </button>
+        <button id="btn-activity" class="px-4 py-2 text-sm rounded-md transition-colors duration-150 sub-tab-inactive" onclick="switchMode('activity')">
+            📊 Activity (近期操作)
+        </button>
     </div>
 
     <div class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Stock / Ticker</th>
-                    <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Shares</th>
-                    <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Value (USD)</th>
-                    <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">% of Portfolio</th>
-                </tr>
-            </thead>
-            <tbody id="table-body" class="divide-y divide-gray-200">
-                </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead id="table-head" class="bg-gray-50">
+                    </thead>
+                <tbody id="table-body" class="divide-y divide-gray-200 bg-white">
+                    </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
     let globalData = null;
+    let currentHolder = null;
+    let currentMode = 'portfolio'; // 默认模式
 
-    // 格式化数字：加上千分位和货币符号
-    const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
-    const formatCurrency = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+    // 格式化工具
+    const formatNum = (num) => num == null ? 'N/A' : new Intl.NumberFormat('en-US').format(num);
+    const formatCurr = (num) => num == null ? 'N/A' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
 
-    // 加载 JSON 数据
-    async function loadData() {
+    // 主函数：获取数据并初始化
+    async function initApp() {
         try {
-            const response = await fetch('whale_holdings.json');
-            globalData = await response.json();
-            document.getElementById('update-date').innerText = `最新披露快照：${globalData.last_updated} (数据源: SEC 13F)`;
+            const res = await fetch('whale_holdings.json');
+            globalData = await res.json();
             
-            initTabs();
+            document.getElementById('update-date').innerHTML = `
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                Snapshot: ${globalData.last_updated} | Source: SEC EDGAR 13F-HR
+            `;
+            
+            const holders = Object.keys(globalData.holders);
+            if (holders.length > 0) {
+                currentHolder = holders[0];
+                renderHolderTabs(holders);
+                renderCurrentView();
+            }
         } catch (error) {
-            document.getElementById('update-date').innerText = "⚠️ 无法加载数据，请确保 whale_holdings.json 存在。";
+            document.getElementById('update-date').innerText = "⚠️ Error loading data. Check whale_holdings.json.";
+            console.error(error);
         }
     }
 
-    // 初始化选项卡
-    function initTabs() {
-        const tabsNav = document.getElementById('tabs-nav');
-        const holders = Object.keys(globalData.holders);
+    // 渲染大佬切换标签
+    function renderHolderTabs(holders) {
+        const nav = document.getElementById('holder-tabs');
+        nav.innerHTML = '';
         
-        holders.forEach((holder, index) => {
+        holders.forEach(holder => {
             const btn = document.createElement('button');
             btn.innerText = holder;
-            // 默认选中第一个
-            btn.className = `whitespace-nowrap py-4 px-1 text-sm ${index === 0 ? 'tab-active' : 'tab-inactive'}`;
+            btn.className = `whitespace-nowrap py-4 px-1 text-sm ${holder === currentHolder ? 'tab-active' : 'tab-inactive'}`;
             btn.onclick = (e) => {
-                // 切换样式
-                Array.from(tabsNav.children).forEach(child => {
-                    child.className = `whitespace-nowrap py-4 px-1 text-sm tab-inactive`;
-                });
-                e.target.className = `whitespace-nowrap py-4 px-1 text-sm tab-active`;
-                // 渲染对应数据
-                renderTable(holder);
+                currentHolder = holder;
+                renderHolderTabs(holders); // 重新渲染刷新选中状态
+                renderCurrentView();       // 刷新表格
             };
-            tabsNav.appendChild(btn);
+            nav.appendChild(btn);
         });
-
-        // 初次渲染第一个大佬的数据
-        if (holders.length > 0) renderTable(holders[0]);
     }
 
-    // 渲染表格数据
-    function renderTable(holderName) {
+    // 切换模式 (Portfolio / Activity)
+    function switchMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-portfolio').className = `px-4 py-2 text-sm rounded-md transition-colors duration-150 ${mode === 'portfolio' ? 'sub-tab-active' : 'sub-tab-inactive'}`;
+        document.getElementById('btn-activity').className = `px-4 py-2 text-sm rounded-md transition-colors duration-150 ${mode === 'activity' ? 'sub-tab-active' : 'sub-tab-inactive'}`;
+        renderCurrentView();
+    }
+
+    // 渲染表格 (核心逻辑)
+    function renderCurrentView() {
+        const thead = document.getElementById('table-head');
         const tbody = document.getElementById('table-body');
-        tbody.innerHTML = ''; // 清空旧数据
-        const holdings = globalData.holders[holderName];
+        tbody.innerHTML = '';
+        
+        const holderData = globalData.holders[currentHolder];
+        if (!holderData) return;
 
-        holdings.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 flex items-center">
-                    <img src="https://logo.clearbit.com/${item.domain}" onerror="this.src='https://www.google.com/s2/favicons?domain=${item.domain}'" class="w-6 h-6 rounded mr-3">
-                    ${item.company}
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-right">${item.shares ? formatNumber(item.shares.replace(/,/g, '')) : 'N/A'}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-right">${formatCurrency(item.value_usd)}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold text-right">${item.percent}%</td>
+        if (currentMode === 'portfolio') {
+            // --- 渲染 Portfolio 表头 ---
+            thead.innerHTML = `
+                <tr>
+                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Company</th>
+                    <th class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Shares</th>
+                    <th class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Value (USD)</th>
+                    <th class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Portfolio %</th>
+                </tr>
             `;
-            tbody.appendChild(tr);
-        });
+            
+            // --- 渲染 Portfolio 数据 ---
+            holderData.portfolio.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 flex items-center">
+                        <img src="https://logo.clearbit.com/${item.domain}" onerror="this.src='https://www.google.com/s2/favicons?domain=${item.domain}'" class="w-6 h-6 rounded mr-3 shadow-sm border border-gray-100">
+                        ${item.company}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600 text-right">${formatNum(item.shares.replace(/,/g, ''))}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600 text-right font-mono">${formatCurr(item.value_usd)}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold text-right">${item.percent}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+        } else if (currentMode === 'activity') {
+            // --- 渲染 Activity 表头 ---
+            thead.innerHTML = `
+                <tr>
+                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Company</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Action</th>
+                    <th class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Shares Changed</th>
+                    <th class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">% Change</th>
+                </tr>
+            `;
+            
+            // --- 渲染 Activity 数据 (带颜色逻辑) ---
+            holderData.activity.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+                
+                // 行动标签样式判定
+                let actionBadge = '';
+                if (item.action === 'Buy') actionBadge = '<span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">New Buy</span>';
+                else if (item.action === 'Add') actionBadge = '<span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Add</span>';
+                else if (item.action === 'Reduce') actionBadge = '<span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Reduce</span>';
+                else if (item.action === 'Sold Out') actionBadge = '<span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">Sold Out</span>';
+                
+                // 数值颜色判定
+                const shareColor = item.shares_changed > 0 ? 'text-green-600' : (item.shares_changed < 0 ? 'text-red-600' : 'text-gray-500');
+                const sign = item.shares_changed > 0 ? '+' : '';
+                
+                tr.innerHTML = `
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 flex items-center">
+                        <img src="https://logo.clearbit.com/${item.domain}" onerror="this.src='https://www.google.com/s2/favicons?domain=${item.domain}'" class="w-6 h-6 rounded mr-3 shadow-sm border border-gray-100">
+                        ${item.company}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-center">${actionBadge}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm font-mono text-right ${shareColor}">${sign}${formatNum(item.shares_changed)}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm font-semibold text-right ${shareColor}">${sign}${item.percent_change}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // 如果该季度没操作
+            if (holderData.activity.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-sm text-gray-500">No trading activity found for the latest quarter.</td></tr>`;
+            }
+        }
     }
 
-    // 启动执行
-    loadData();
+    // 启动
+    initApp();
 </script>
-
 </body>
 </html>
