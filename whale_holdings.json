@@ -1,0 +1,401 @@
+{
+    "last_updated": "2026-04-01",
+    "holders": {
+        "巴菲特 (Berkshire)": [
+            {
+                "company": "APPLE INC",
+                "value_usd": 61961735283000,
+                "shares": 227917808,
+                "percent": 22.6,
+                "domain": "apple.com"
+            },
+            {
+                "company": "AMERICAN EXPRESS CO",
+                "value_usd": 56088378465000,
+                "shares": 151610700,
+                "percent": 20.46,
+                "domain": "americanexpress.com"
+            },
+            {
+                "company": "BANK AMERICA CORP",
+                "value_usd": 28451276370000,
+                "shares": 517295934,
+                "percent": 10.38,
+                "domain": "google.com"
+            },
+            {
+                "company": "COCA COLA CO",
+                "value_usd": 27964000000000,
+                "shares": 400000000,
+                "percent": 10.2,
+                "domain": "cocacola.com"
+            },
+            {
+                "company": "CHEVRON CORP NEW",
+                "value_usd": 19837131131000,
+                "shares": 130156362,
+                "percent": 7.24,
+                "domain": "chevron.com"
+            },
+            {
+                "company": "MOODYS CORP",
+                "value_usd": 12602556092000,
+                "shares": 24669778,
+                "percent": 4.6,
+                "domain": "moodys.com"
+            },
+            {
+                "company": "OCCIDENTAL PETE CORP",
+                "value_usd": 10894391643000,
+                "shares": 264941431,
+                "percent": 3.97,
+                "domain": "oxy.com"
+            },
+            {
+                "company": "CHUBB LIMITED",
+                "value_usd": 10689854998000,
+                "shares": 34249183,
+                "percent": 3.9,
+                "domain": "google.com"
+            },
+            {
+                "company": "KRAFT HEINZ CO",
+                "value_usd": 7896644337000,
+                "shares": 325634818,
+                "percent": 2.88,
+                "domain": "kraftheinz.com"
+            },
+            {
+                "company": "ALPHABET INC",
+                "value_usd": 5585842446000,
+                "shares": 17846142,
+                "percent": 2.04,
+                "domain": "google.com"
+            },
+            {
+                "company": "DAVITA INC",
+                "value_usd": 3608147375000,
+                "shares": 31759065,
+                "percent": 1.32,
+                "domain": "google.com"
+            },
+            {
+                "company": "KROGER CO",
+                "value_usd": 3124000000000,
+                "shares": 50000000,
+                "percent": 1.14,
+                "domain": "google.com"
+            },
+            {
+                "company": "VISA INC",
+                "value_usd": 2910002197000,
+                "shares": 8297460,
+                "percent": 1.06,
+                "domain": "visa.com"
+            },
+            {
+                "company": "SIRIUS XM HOLDINGS INC",
+                "value_usd": 2495518305000,
+                "shares": 124807117,
+                "percent": 0.91,
+                "domain": "google.com"
+            },
+            {
+                "company": "MASTERCARD INCORPORATED",
+                "value_usd": 2275897610000,
+                "shares": 3986648,
+                "percent": 0.83,
+                "domain": "mastercard.com"
+            },
+            {
+                "company": "VERISIGN INC",
+                "value_usd": 2184091346000,
+                "shares": 8989880,
+                "percent": 0.8,
+                "domain": "google.com"
+            },
+            {
+                "company": "CONSTELLATION BRANDS INC",
+                "value_usd": 1793480000000,
+                "shares": 13000000,
+                "percent": 0.65,
+                "domain": "google.com"
+            },
+            {
+                "company": "CAPITAL ONE FINL CORP",
+                "value_usd": 1732874000000,
+                "shares": 7150000,
+                "percent": 0.63,
+                "domain": "google.com"
+            },
+            {
+                "company": "UNITEDHEALTH GROUP INC",
+                "value_usd": 1663610472000,
+                "shares": 5039564,
+                "percent": 0.61,
+                "domain": "google.com"
+            },
+            {
+                "company": "DOMINOS PIZZA INC",
+                "value_usd": 1396347000000,
+                "shares": 3350000,
+                "percent": 0.51,
+                "domain": "google.com"
+            },
+            {
+                "company": "ALLY FINL INC",
+                "value_usd": 1313410001000,
+                "shares": 29000000,
+                "percent": 0.48,
+                "domain": "google.com"
+            },
+            {
+                "company": "AON PLC",
+                "value_usd": 1271424876000,
+                "shares": 3602995,
+                "percent": 0.46,
+                "domain": "google.com"
+            },
+            {
+                "company": "NUCOR CORP",
+                "value_usd": 1045167939000,
+                "shares": 6407749,
+                "percent": 0.38,
+                "domain": "google.com"
+            },
+            {
+                "company": "LIBERTY LIVE HOLDINGS INC",
+                "value_usd": 907912688000,
+                "shares": 10917661,
+                "percent": 0.33,
+                "domain": "google.com"
+            },
+            {
+                "company": "LENNAR CORP",
+                "value_usd": 724837660000,
+                "shares": 7050950,
+                "percent": 0.26,
+                "domain": "google.com"
+            },
+            {
+                "company": "POOL CORP",
+                "value_usd": 702007444000,
+                "shares": 3068885,
+                "percent": 0.26,
+                "domain": "google.com"
+            },
+            {
+                "company": "AMAZON COM INC",
+                "value_usd": 525346320000,
+                "shares": 2276000,
+                "percent": 0.19,
+                "domain": "google.com"
+            },
+            {
+                "company": "LOUISIANA PAC CORP",
+                "value_usd": 457488683000,
+                "shares": 5664793,
+                "percent": 0.17,
+                "domain": "google.com"
+            },
+            {
+                "company": "LIBERTY LIVE HOLDINGS INC",
+                "value_usd": 406406923000,
+                "shares": 4986588,
+                "percent": 0.15,
+                "domain": "google.com"
+            },
+            {
+                "company": "NEW YORK TIMES CO",
+                "value_usd": 351663948000,
+                "shares": 5065744,
+                "percent": 0.13,
+                "domain": "google.com"
+            },
+            {
+                "company": "HEICO CORP NEW",
+                "value_usd": 326798907000,
+                "shares": 1294612,
+                "percent": 0.12,
+                "domain": "google.com"
+            },
+            {
+                "company": "LIBERTY MEDIA CORP DEL",
+                "value_usd": 297357853000,
+                "shares": 3018555,
+                "percent": 0.11,
+                "domain": "google.com"
+            },
+            {
+                "company": "CHARTER COMMUNICATIONS INC N",
+                "value_usd": 221459118000,
+                "shares": 1060882,
+                "percent": 0.08,
+                "domain": "google.com"
+            },
+            {
+                "company": "LAMAR ADVERTISING CO NEW",
+                "value_usd": 152201058000,
+                "shares": 1202410,
+                "percent": 0.06,
+                "domain": "google.com"
+            },
+            {
+                "company": "ALLEGION PLC",
+                "value_usd": 124212776000,
+                "shares": 780133,
+                "percent": 0.05,
+                "domain": "google.com"
+            },
+            {
+                "company": "NVR INC",
+                "value_usd": 81037260000,
+                "shares": 11112,
+                "percent": 0.03,
+                "domain": "google.com"
+            },
+            {
+                "company": "JEFFERIES FINL GROUP INC",
+                "value_usd": 26867589000,
+                "shares": 433558,
+                "percent": 0.01,
+                "domain": "google.com"
+            },
+            {
+                "company": "DIAGEO PLC",
+                "value_usd": 19647993000,
+                "shares": 227750,
+                "percent": 0.01,
+                "domain": "google.com"
+            },
+            {
+                "company": "LIBERTY LATIN AMERICA LTD",
+                "value_usd": 17711354000,
+                "shares": 2396665,
+                "percent": 0.01,
+                "domain": "google.com"
+            },
+            {
+                "company": "LENNAR CORP",
+                "value_usd": 17214818000,
+                "shares": 180980,
+                "percent": 0.01,
+                "domain": "google.com"
+            },
+            {
+                "company": "LIBERTY LATIN AMERICA LTD",
+                "value_usd": 9578789000,
+                "shares": 1284020,
+                "percent": 0.0,
+                "domain": "google.com"
+            },
+            {
+                "company": "ATLANTA BRAVES HLDGS INC",
+                "value_usd": 4553634000,
+                "shares": 115428,
+                "percent": 0.0,
+                "domain": "google.com"
+            }
+        ],
+        "段永平 (H&H)": [
+            {
+                "company": "APPLE INC",
+                "value_usd": 8796983713000,
+                "shares": 32358507,
+                "percent": 50.3,
+                "domain": "apple.com"
+            },
+            {
+                "company": "BERKSHIRE HATHAWAY INC DEL",
+                "value_usd": 3607114919000,
+                "shares": 7176196,
+                "percent": 20.63,
+                "domain": "berkshirehathaway.com"
+            },
+            {
+                "company": "NVIDIA CORPORATION",
+                "value_usd": 1349719150000,
+                "shares": 7237100,
+                "percent": 7.72,
+                "domain": "nvidia.com"
+            },
+            {
+                "company": "PDD HOLDINGS INC",
+                "value_usd": 1308145733000,
+                "shares": 11536694,
+                "percent": 7.48,
+                "domain": "google.com"
+            },
+            {
+                "company": "ALPHABET INC",
+                "value_usd": 582224520000,
+                "shares": 1855400,
+                "percent": 3.33,
+                "domain": "google.com"
+            },
+            {
+                "company": "OCCIDENTAL PETE CORP",
+                "value_usd": 541657312000,
+                "shares": 13172600,
+                "percent": 3.1,
+                "domain": "oxy.com"
+            },
+            {
+                "company": "MICROSOFT CORP",
+                "value_usd": 415429580000,
+                "shares": 859000,
+                "percent": 2.38,
+                "domain": "microsoft.com"
+            },
+            {
+                "company": "ALIBABA GROUP HLDG LTD",
+                "value_usd": 375318090000,
+                "shares": 2560500,
+                "percent": 2.15,
+                "domain": "alibaba.com"
+            },
+            {
+                "company": "TAIWAN SEMICONDUCTOR MFG LTD",
+                "value_usd": 372078054000,
+                "shares": 1224384,
+                "percent": 2.13,
+                "domain": "tsmc.com"
+            },
+            {
+                "company": "DISNEY WALT CO",
+                "value_usd": 81004240000,
+                "shares": 712000,
+                "percent": 0.46,
+                "domain": "disney.com"
+            },
+            {
+                "company": "COREWEAVE INC",
+                "value_usd": 21475839000,
+                "shares": 299900,
+                "percent": 0.12,
+                "domain": "google.com"
+            },
+            {
+                "company": "CREDO TECHNOLOGY GROUP HOLDI",
+                "value_usd": 20331657000,
+                "shares": 141300,
+                "percent": 0.12,
+                "domain": "google.com"
+            },
+            {
+                "company": "ASML HOLDING N V",
+                "value_usd": 10591614000,
+                "shares": 9900,
+                "percent": 0.06,
+                "domain": "google.com"
+            },
+            {
+                "company": "TEMPUS AI INC",
+                "value_usd": 6495500000,
+                "shares": 110000,
+                "percent": 0.04,
+                "domain": "google.com"
+            }
+        ]
+    }
+}
